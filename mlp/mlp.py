@@ -141,6 +141,7 @@ class mlp(object):
 		delta_hidden_wb_old=0
 		
 		for i in xrange(self.max_itration):
+			print 'new iteration **************'
 			'''
 			forward process
 			'''
@@ -150,28 +151,28 @@ class mlp(object):
 			print x.shape
 			'''
 			hidden_input=np.dot(x,self.hidden_wb.T)
-			#print hidden_input.shape
+			#print 'hidden_input.shape is '+str(hidden_input.shape)
 			#the output dimension is the neuron number, becase the hidden_wb has rows of neuron number, bias is added to every neuron
 			hidden_output=self.activation(hidden_input)
 			
-			#print hidden_output.shape
+			#print 'hidden_output.shape is '+str(hidden_output.shape)
 			hidden_output_extend=self.addCol(hidden_output,np.ones((self.train_sampleNum,1)))
-			#print hidden_output_extend.shape
-			#print self.output_wb.shape
+			#print 'hidden_output_extend.shape is '+str(hidden_output_extend.shape)
+			print 'output_wb.shape is '+str(self.output_wb.shape)
 			output_input=np.dot(hidden_output_extend,self.output_wb.T)
 			'''
 			you know the input dimension should be 2, so the output_input is a matrix with 2 column
 			matrix is a good friend, because if only the row number is correct
 			your program is correct
 			'''
-			#print output_input.shape
+			print 'output_input.shape is '+str(output_input.shape)
 			output_output=self.activation(output_input)
 			
 			'''
 			backward process
 			'''
-			#print 'y.shape is ' +str(y.shape)
-			#print 'output_output.shape is '+str(output_output.shape)
+			print 'y.shape is ' +str(y.shape)
+			print 'output_output.shape is '+str(output_output.shape)
 			error=y-output_output
 			#sum all elements in a matrix-> scalar
 			mse=self.errorFunc(error)
@@ -181,16 +182,16 @@ class mlp(object):
 				break;
 			
 			#error is derivated by a vector, which is a vector
-			#print 'error.shape is ' + str(error.shape)
+			print 'error.shape is ' + str(error.shape)
 			#print self.derivative(output_output).shape
 			#because the error is a matrix not a array so you canot use matrix * array
 			output_gradient=np.multiply(error,self.derivative(output_output))
 			#think about the meaning of every equation, this focus every on one hidden neuron
-			print 'output_gradient.shape is '+str(output_gradient.shape)
+			#print 'output_gradient.shape is '+str(output_gradient.shape)
 			#print 'hidden_output_extend.shape is '+str(hidden_output_extend.shape)
 			#the dimension of delta_output is the output_wb, because each weight should be updated
 			
-			delta_output_wb=np.dot(hidden_output_extend.T,output_gradient)
+			delta_output_wb=np.dot(output_gradient.T,hidden_output_extend)
 			print 'delta_output_wb.shape is '+str(delta_output_wb.shape)
 			'''
 			update one w_ij, [delta_1,delta_2,...,delta_k]*[w_ji,w_j2,...,w_jk]* (gradient of O_j)*O_i
@@ -199,12 +200,16 @@ class mlp(object):
 			when you use *, one of the element must be vector or scala,if 2 matrix, we must use the np.dot
 			'''
 			#as for each hidden neuron, because each neuron only can has one gradient, so a samples*hidden_neurons matrix
-			print 'self.output_wb[:,:-1].shape is '+str(self.output_wb[:,:-1].shape)
-			print 'derivative(hidden_output).shape is '+str(self.derivative(hidden_output).shape)
+			#print 'self.output_wb[:,:-1].shape is '+str(self.output_wb[:,:-1].shape)
+			#print 'derivative(hidden_output).shape is '+str(self.derivative(hidden_output).shape)
 			#hidden_delta should be neurons*1 matrxi
 			#only the derivative is mulitply others is dot product
-			hidden_delta=np.dot(self.output_wb[:,:-1].T*output_gradient)*self.derivative(hidden_output)
-			delta_hidden_wb=np.dot(hidden_delta,x.T)
+			#np.dot(self.output_wb[:,:-1].T,output_gradient) is the L1_error, just like the L2_error which we use to * the derivative of output_output
+			hidden_delta=np.multiply(np.dot(output_gradient,self.output_wb[:,:-1]),self.derivative(hidden_output))
+			#print 'hidden_delta.shape is '+str(hidden_delta.shape)
+			#print 'x.shape is '+str(x.shape)
+			delta_hidden_wb=np.dot(hidden_delta.T,x)
+			#print 'delta_hidden_wb.shape is '+str(delta_hidden_wb.shape)
 			
 			if i==0:
 				self.output_wb=self.output_wb+self.eta*delta_output_wb
