@@ -34,14 +34,15 @@ class mlp(object):
 		self.error_goal=0.01
 		self.max_itration=1000
 		self.iteration=0
-		self.eta=0.1
+		self.eta=0.001
 		self.mc=0.3
 		self.hidden_neurons=4
-		self.output_neurons=1
+		self.output_neurons=10
 		'''
 		automatic parameter
 		errorList is the current error for visulation
 		train_set is the training set
+		labels is the training label
 		valid_set is for overfitting
 		test_set is for test
 		inputDim is the dimension of samples
@@ -51,6 +52,7 @@ class mlp(object):
 		self.errorList=[]
 		self.train_set=0
 		self.valid_set=0
+		self.labels=0
 		self.test_set=0
 		self.inputDim=0
 		self.train_sampleNum=0
@@ -65,20 +67,17 @@ class mlp(object):
 		'''
 		self.hidden_w = 2*np.random.random((self.hidden_neurons,self.inputDim)) - 1
 		self.hidden_bias=2*np.random.random((self.hidden_neurons,1)) - 1
-		self.hidden_wb=self.addRow(self.hidden_w,self.hidden_bias)
+		self.hidden_wb=self.addCol(self.hidden_w,self.hidden_bias)
 		
 		
 
 	def init_outputWB(self):
 		self.output_w=2*np.random.random((self.output_neurons,self.hidden_neurons)) - 1;
 		self.output_bias=2*np.random.random((self.output_neurons,1)) - 1
-		self.output_wb=self.addRow(self.output_w,self.output_bias)
+		self.output_wb=self.addCol(self.output_w,self.output_bias)
 
 
-	def loadDataSet(self,filepath):
-		f=gzip.open(filepath,'rb')
-		self.train_set,self.valid_set,self.test_set=cPickle.load(f)
-		f.close()
+	
 		
 	def normalize(self,dataMat):
 		'''
@@ -98,7 +97,7 @@ class mlp(object):
 		return dataMat
 		
 	def addRow(self,mat1,mat2):
-		mat=np.hstack((mat1,mat2))
+		mat=np.vstack((mat1,mat2))
 		return mat
 		
 	def addCol(self,mat1,mat2):
@@ -106,7 +105,8 @@ class mlp(object):
 		return mat
 
 	#def drawClassScatter(self,plt):
-		
+	
+	#drawbackness this function max value only can be 1 when the label is 9,8 big value, all the prediction will be 1 because the least is 1 in my samples
 	def activation(self,data):
 		return 1.0/(1.0+np.exp(-data))
 
@@ -116,16 +116,18 @@ class mlp(object):
 	def derivative(self,data):
 		return np.multiply(data,(1-data))
 		
+	
 	def bpTrain(self):
-		x0=self.normalize(self.train_set[0])
+		#return
+		#x0=self.normalize(self.train_set)
+		x0=self.train_set
 		'''
 		just take a little piece
 		'''
 		x0=x0[0:99,:]
-		labels=self.train_set[1]
-		label_matrix=np.matrix(labels).T
-		y=label_matrix[0:99]
-		print 'labels.shape' + str(labels.shape)
+		label_matrix=np.matrix(self.labels)
+		y=label_matrix
+		print 'labels.shape' + str(self.labels.shape)
 		#y[:,1]=labels[0:99]
 		#train set need add one column for bias
 		self.train_sampleNum=x0.shape[0]
@@ -160,6 +162,8 @@ class mlp(object):
 			#print 'hidden_output_extend.shape is '+str(hidden_output_extend.shape)
 			print 'output_wb.shape is '+str(self.output_wb.shape)
 			output_input=np.dot(hidden_output_extend,self.output_wb.T)
+			#print output_input
+			return
 			'''
 			you know the input dimension should be 2, so the output_input is a matrix with 2 column
 			matrix is a good friend, because if only the row number is correct
@@ -167,15 +171,17 @@ class mlp(object):
 			'''
 			print 'output_input.shape is '+str(output_input.shape)
 			output_output=self.activation(output_input)
-			
+			#print output_input
 			'''
 			backward process
 			'''
 			print 'y.shape is ' +str(y.shape)
 			print 'output_output.shape is '+str(output_output.shape)
 			error=y-output_output
+			#print output_output
 			#sum all elements in a matrix-> scalar
 			mse=self.errorFunc(error)
+			print error
 			self.errorList.append(mse)
 			if mse<=self.error_goal:
 				self.iteration=i+1
@@ -185,8 +191,10 @@ class mlp(object):
 			print 'error.shape is ' + str(error.shape)
 			#print self.derivative(output_output).shape
 			#because the error is a matrix not a array so you canot use matrix * array
-			print y
+			#print error
+			#here output_output all is one so the derivative output*(1-output)=0 always, it cause by output_input so big more than 50 each element
 			output_gradient=np.multiply(error,self.derivative(output_output))
+			#print output_output
 			#think about the meaning of every equation, this focus every on one hidden neuron
 			#print 'output_gradient.shape is '+str(output_gradient.shape)
 			#print 'hidden_output_extend.shape is '+str(hidden_output_extend.shape)
@@ -194,6 +202,7 @@ class mlp(object):
 			
 			delta_output_wb=np.dot(output_gradient.T,hidden_output_extend)
 			print 'delta_output_wb.shape is '+str(delta_output_wb.shape)
+			#print output_gradient
 			'''
 			update one w_ij, [delta_1,delta_2,...,delta_k]*[w_ji,w_j2,...,w_jk]* (gradient of O_j)*O_i
 			update all w_ij, [delta_1,delta_2,...,delta_k]*[[w_1i,w_12,...,w_1k],[w_2i,w_22,...,w_2k],...]*[gradient_1,gradient_2,....]*[O_1,O_2,....]
@@ -215,9 +224,13 @@ class mlp(object):
 			if i==0:
 				self.output_wb=self.output_wb+self.eta*delta_output_wb
 				self.hidden_wb=self.hidden_wb+self.eta*delta_hidden_wb
+				
 			else:
 				self.output_wb=self.output_wb+(1.0-self.mc)*self.eta*delta_output_wb + self.mc*delta_output_wb_old
 				self.hidden_wb=self.hidden_wb+(1.0-self.mc)*self.eta*delta_hidden_wb + self.mc*delta_hidden_wb_old
+				#print 'self.output_wb is '+str(self.output_wb)
+			#print error	
+			#return
 			
 			delta_output_wb_old=delta_output_wb
 			delta_hidden_wb_old=delta_hidden_wb
