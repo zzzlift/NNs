@@ -91,7 +91,7 @@ def activation(self,data):
 	return 1.0/(1.0+exp(-data))
 
 def errorFunc(self,data):
-	retrun np.sum(np.power(data,2))*0.5
+	return np.sum(np.power(data,2))*0.5
 
 def derivative(self,data):
 	return data*(1-data)
@@ -99,9 +99,11 @@ def derivative(self,data):
 def bpTrain(self):
 	xo=self.train_set[0]
 	#train set need add one column for bias
+	self.train_sampleNum=self.train_set.shape[0]
+	self.inputDim=self.train_set.shape[0]
 	x=addCol(xo,np.ones((self.train_sampleNum,1))
-	
 	y=self.train_set[1]
+	
 	self.init_hiddenWB()
 	self.init_outputWB()
 	
@@ -154,5 +156,17 @@ def bpTrain(self):
 		delta_output_wb_old=delta_output_wb
 		delta_hidden_wb_old=delta_hidden_wb
 		
-def BPClassifier(self,start,end,steps=30):
-	x=
+def BPClassifier(self):
+	x0=self.test_set[0]
+	sampleNum=self.test_set.shape[0]
+	x=addCol(x0,np.ones((sampleNum,1))
+	y=self.test_set[1]
+	hidden_input=np.dot(self.hidden_wb,x.T)
+	hidden_output=self.activation(hidden_input)
+	row,col=hidden_ouput.shape
+	hidden_output_extend=addCol(hidden_output,np.ones(sampleNum,1))
+	output_input=np.dot(output_wb,hidden_output_extend.T)
+	output=self.activation(output_input)
+	
+
+	
