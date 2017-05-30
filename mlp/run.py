@@ -11,5 +11,7 @@ if __name__=="main":
 	
 	mlp.BPClassifier()
 	
+	print'dd'
+	
 	
 	
