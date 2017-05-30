@@ -114,7 +114,7 @@ class mlp(object):
 		return np.sum(np.power(data,2))*0.5
 
 	def derivative(self,data):
-		return data*(1-data)
+		return np.multiply(data,(1-data))
 		
 	def bpTrain(self):
 		x0=self.normalize(self.train_set[0])
@@ -185,6 +185,7 @@ class mlp(object):
 			print 'error.shape is ' + str(error.shape)
 			#print self.derivative(output_output).shape
 			#because the error is a matrix not a array so you canot use matrix * array
+			print y
 			output_gradient=np.multiply(error,self.derivative(output_output))
 			#think about the meaning of every equation, this focus every on one hidden neuron
 			#print 'output_gradient.shape is '+str(output_gradient.shape)
