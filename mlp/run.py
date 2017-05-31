@@ -15,6 +15,7 @@ if __name__=="__main__":
 	
 	mlp.hidden_neurons=20
 	mlp.output_neurons=10
+	#this is the most important parameter, you have no need to care about the error_goal
 	mlp.max_iteration=1000
 	mlp.error_goal=0.01
 	mlp.batch=10
