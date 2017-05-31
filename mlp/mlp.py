@@ -54,9 +54,21 @@ class mlp(object):
 		self.valid_set=0
 		self.labels=0
 		self.test_set=0
+		self.test_labels=0
 		self.inputDim=0
 		self.train_sampleNum=0
-		
+	
+	
+	
+	def labelConvert(self,y,types):
+		l=np.empty((0,types))
+		for i in xrange(y.shape[0]):
+			t=np.zeros((1,10))
+			t[0][y[i]]=1
+			l=self.addRow(l,t)
+		print l.shape
+		return l
+	
 	def init_hiddenWB(self):
 		'''
 		self_hidden_w=
@@ -119,12 +131,11 @@ class mlp(object):
 	
 	def bpTrain(self):
 		#return
-		#x0=self.normalize(self.train_set)
 		x0=self.train_set
 		'''
 		just take a little piece
 		'''
-		x0=x0[0:99,:]
+		#x0=x0[0:99,:]
 		label_matrix=np.matrix(self.labels)
 		y=label_matrix
 		print 'labels.shape' + str(self.labels.shape)
@@ -139,7 +150,7 @@ class mlp(object):
 		self.init_hiddenWB()
 		self.init_outputWB()
 		
-		delat_output_wb_old=0
+		delta_output_wb_old=0
 		delta_hidden_wb_old=0
 		
 		for i in xrange(self.max_itration):
@@ -234,18 +245,20 @@ class mlp(object):
 			
 			delta_output_wb_old=delta_output_wb
 			delta_hidden_wb_old=delta_hidden_wb
-			
+	
+	#classifier is the forward process
 	def BPClassifier(self):
-		x0=self.normalize(self.test_set[0])
-		sampleNum=self.test_set.shape[0]
+		x0=self.test_set
+		sampleNum=x0.shape[0]
 		x=self.addCol(x0,np.ones((sampleNum,1)))
-		y=self.test_set[1]
-		hidden_input=np.dot(self.hidden_wb,x.T)
+		label_matrix=np.matrix(self.test_labels)
+		y=label_matrix
+		hidden_input=np.dot(x,self.hidden_wb.T)
 		hidden_output=self.activation(hidden_input)
-		row,col=hidden_ouput.shape
-		hidden_output_extend=self.addCol(hidden_output,np.ones(sampleNum,1))
-		output_input=np.dot(output_wb,hidden_output_extend.T)
-		output=self.activation(output_input)
+		hidden_output_extend=self.addCol(hidden_output,np.ones((sampleNum,1)))
+		output_input=np.dot(hidden_output_extend,self.output_wb.T)
+		output_output=self.activation(output_input)
+		return output_output
 		
 
 		
