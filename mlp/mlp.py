@@ -38,6 +38,7 @@ class mlp(object):
 		self.mc=0.3
 		self.hidden_neurons=4
 		self.output_neurons=10
+		self.batch=10
 		'''
 		automatic parameter
 		errorList is the current error for visulation
@@ -66,7 +67,7 @@ class mlp(object):
 			t=np.zeros((1,10))
 			t[0][y[i]]=1
 			l=self.addRow(l,t)
-		print l.shape
+		#print l.shape
 		return l
 	
 	def init_hiddenWB(self):
@@ -137,24 +138,32 @@ class mlp(object):
 		'''
 		#x0=x0[0:99,:]
 		label_matrix=np.matrix(self.labels)
-		y=label_matrix
-		print 'labels.shape' + str(self.labels.shape)
+		yAll=label_matrix
+		#print 'labels.shape' + str(self.labels.shape)
 		#y[:,1]=labels[0:99]
 		#train set need add one column for bias
 		self.train_sampleNum=x0.shape[0]
 		self.inputDim=x0.shape[1]
 		#print self.train_sampleNum
-		x=self.addCol(x0,np.ones((self.train_sampleNum,1)))
-		
+		xAll=self.addCol(x0,np.ones((self.train_sampleNum,1)))
+		print xAll.shape
 		
 		self.init_hiddenWB()
 		self.init_outputWB()
 		
+		#print self.hidden_wb
+		#print self.output_wb
+		#return 
 		delta_output_wb_old=0
 		delta_hidden_wb_old=0
 		
 		for i in xrange(self.max_itration):
-			print 'new iteration **************'
+			print 'new iteration **************'+str(i)
+			#print self.output_wb
+			#if i==4:
+			#	return
+			print i*self.batch
+			x=xAll[i*self.batch:(i+1)*self.batch,:]
 			'''
 			forward process
 			'''
@@ -169,12 +178,11 @@ class mlp(object):
 			hidden_output=self.activation(hidden_input)
 			
 			#print 'hidden_output.shape is '+str(hidden_output.shape)
-			hidden_output_extend=self.addCol(hidden_output,np.ones((self.train_sampleNum,1)))
+			hidden_output_extend=self.addCol(hidden_output,np.ones((self.batch,1)))
 			#print 'hidden_output_extend.shape is '+str(hidden_output_extend.shape)
 			print 'output_wb.shape is '+str(self.output_wb.shape)
 			output_input=np.dot(hidden_output_extend,self.output_wb.T)
 			#print output_input
-			return
 			'''
 			you know the input dimension should be 2, so the output_input is a matrix with 2 column
 			matrix is a good friend, because if only the row number is correct
@@ -192,14 +200,14 @@ class mlp(object):
 			#print output_output
 			#sum all elements in a matrix-> scalar
 			mse=self.errorFunc(error)
-			print error
+			print 'mse '+str(mse)
 			self.errorList.append(mse)
 			if mse<=self.error_goal:
 				self.iteration=i+1
 				break;
 			
 			#error is derivated by a vector, which is a vector
-			print 'error.shape is ' + str(error.shape)
+			#print 'error.shape is ' + str(error.shape)
 			#print self.derivative(output_output).shape
 			#because the error is a matrix not a array so you canot use matrix * array
 			#print error
@@ -212,8 +220,9 @@ class mlp(object):
 			#the dimension of delta_output is the output_wb, because each weight should be updated
 			
 			delta_output_wb=np.dot(output_gradient.T,hidden_output_extend)
-			print 'delta_output_wb.shape is '+str(delta_output_wb.shape)
-			#print output_gradient
+			
+			#print 'delta_output_wb.shape is '+str(delta_output_wb.shape)
+			#print np.max(hidden_input,axis=1)
 			'''
 			update one w_ij, [delta_1,delta_2,...,delta_k]*[w_ji,w_j2,...,w_jk]* (gradient of O_j)*O_i
 			update all w_ij, [delta_1,delta_2,...,delta_k]*[[w_1i,w_12,...,w_1k],[w_2i,w_22,...,w_2k],...]*[gradient_1,gradient_2,....]*[O_1,O_2,....]
@@ -242,7 +251,8 @@ class mlp(object):
 				#print 'self.output_wb is '+str(self.output_wb)
 			#print error	
 			#return
-			
+			print 'output_wb'
+			print self.output_wb
 			delta_output_wb_old=delta_output_wb
 			delta_hidden_wb_old=delta_hidden_wb
 	
