@@ -162,8 +162,10 @@ class mlp(object):
 			#print self.output_wb
 			#if i==4:
 			#	return
-			print i*self.batch
-			x=xAll[i*self.batch:(i+1)*self.batch,:]
+			#print i*self.batch
+			batch_id=i%self.max_itration
+			x=xAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
+			y=yAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
 			'''
 			forward process
 			'''
@@ -180,7 +182,7 @@ class mlp(object):
 			#print 'hidden_output.shape is '+str(hidden_output.shape)
 			hidden_output_extend=self.addCol(hidden_output,np.ones((self.batch,1)))
 			#print 'hidden_output_extend.shape is '+str(hidden_output_extend.shape)
-			print 'output_wb.shape is '+str(self.output_wb.shape)
+			#print 'output_wb.shape is '+str(self.output_wb.shape)
 			output_input=np.dot(hidden_output_extend,self.output_wb.T)
 			#print output_input
 			'''
@@ -188,14 +190,14 @@ class mlp(object):
 			matrix is a good friend, because if only the row number is correct
 			your program is correct
 			'''
-			print 'output_input.shape is '+str(output_input.shape)
+			#print 'output_input.shape is '+str(output_input.shape)
 			output_output=self.activation(output_input)
 			#print output_input
 			'''
 			backward process
 			'''
-			print 'y.shape is ' +str(y.shape)
-			print 'output_output.shape is '+str(output_output.shape)
+			#print 'y.shape is ' +str(y.shape)
+			#print 'output_output.shape is '+str(output_output.shape)
 			error=y-output_output
 			#print output_output
 			#sum all elements in a matrix-> scalar
@@ -251,8 +253,8 @@ class mlp(object):
 				#print 'self.output_wb is '+str(self.output_wb)
 			#print error	
 			#return
-			print 'output_wb'
-			print self.output_wb
+			#print 'output_wb'
+			#print self.output_wb
 			delta_output_wb_old=delta_output_wb
 			delta_hidden_wb_old=delta_hidden_wb
 	

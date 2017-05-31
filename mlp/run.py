@@ -12,6 +12,7 @@ def loadDataSet(filepath):
 	
 if __name__=="__main__":
 	mlp=mlp()
+	
 	mlp.hidden_neurons=20
 	mlp.output_neurons=10
 	mlp.max_iteration=1000
