@@ -7,7 +7,10 @@ def loadDataSet(filepath):
 	data=cPickle.load(f)
 	f.close()
 	return data
-
+'''
+mlp has lots of things to consider. you need to use the momentum factor or inertial factor to search the optimal result
+you need to think how many samples in a batch, you can use small number of them, even one sample in a batch, but you can't use too much in a batch, Batch means you add the errors from all samples and upate the weigth once according to the total error. you use small number batch only means you will converge very slow or get a loca optimum. but it won't influence too much. but you use large number batch, you will crash. because every time you update the delta_weigth too big. it just like you use a large step. the large step length. training or learning process in fact is a optimization process. if you can find a very easy way to search the parameter of a function. you don't need neural network at all. you just use math to solve it.
+'''
 
 	
 if __name__=="__main__":
@@ -58,7 +61,7 @@ if __name__=="__main__":
 	print prediction
 	'''
 	predict=np.argmax(prediction,axis=1)
-	print predict
+	#print predict
 	dist=predict-np.matrix(y_test).T
 	print dist
 	

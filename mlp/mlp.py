@@ -1,7 +1,10 @@
 import gzip
 import numpy as np
 import cPickle
-
+'''
+created on May 28 2017
+@author: Zack
+'''
 class mlp(object):
 	'''
 	def __init__(self):
