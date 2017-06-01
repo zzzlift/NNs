@@ -49,15 +49,22 @@ class network():
 		output_layer.neurons=self.labels.shape[1]
 		output_layer.activation=self.props
 		
+		batch_id=0
+		begin=0
+		end=0
 		#training
 		for i in xrange(self.max_itration):
-			if self.max_itration*self.batch>train_samples:
-				batch_id=i%self.max_itration
+			if end>=train_samples:
+				#batch_id=begin%train_samples
+				batch_id=0
 			else:
-				batch_id=i
-			x=self.xAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
-			y=self.labels[batch_id*self.batch:(batch_id+1)*self.batch,:]
-			
+				batch_id=batch_id+1
+			begin=batch_id*self.batch
+			end=(batch_id+1)*self.batch
+			x=self.xAll[begin:end,:]
+			y=self.labels[begin:end,:]
+			print train_samples
+			print end
 			hidden_layer1.input=x
 			hidden_layer1.samples=x.shape[0]
 			hidden_layer1_output=hidden_layer1.forward()
@@ -72,7 +79,7 @@ class network():
 			
 			error=y-output_layer_output
 			mse=self.props.errorFunc(error)
-			print 'mse '+str(mse)
+			print 'mse '+str(mse)+' iteration '+str(i+1)
 			self.errorList.append(mse)
 			if mse<=self.error_goal:
 				self.iteration=i+1

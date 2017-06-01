@@ -159,19 +159,23 @@ class mlp(object):
 		#return 
 		delta_output_wb_old=0
 		delta_hidden_wb_old=0
-		
+		begin=0
+		end=0
+		batch_id=0
 		for i in xrange(self.max_itration):
-			print 'new iteration **************'+str(i)
+			#print 'new iteration **************'+str(i)
 			#print self.output_wb
 			#if i==4:
 			#	return
 			#print i*self.batch
-			if self.max_itration*self.batch>self.train_sampleNum:
-				batch_id=i%self.max_itration
+			if end>=self.train_sampleNum:
+				batch_id=0
 			else:
-				batch_id=i
-			x=xAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
-			y=yAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
+				batch_id=batch_id+1
+			begin=batch_id*self.batch
+			end=(batch_id+1)*self.batch
+			x=xAll[begin:end,:]
+			y=yAll[begin:end,:]
 			'''
 			forward process
 			'''
@@ -208,7 +212,7 @@ class mlp(object):
 			#print output_output
 			#sum all elements in a matrix-> scalar
 			mse=self.errorFunc(error)
-			print 'mse '+str(mse)
+			print 'mse '+str(mse)+' iteration '+str(i+1)
 			self.errorList.append(mse)
 			if mse<=self.error_goal:
 				self.iteration=i+1
