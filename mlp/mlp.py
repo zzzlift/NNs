@@ -166,7 +166,10 @@ class mlp(object):
 			#if i==4:
 			#	return
 			#print i*self.batch
-			batch_id=i%self.max_itration
+			if self.max_itration*self.batch>self.train_sampleNum:
+				batch_id=i%self.max_itration
+			else:
+				batch_id=i
 			x=xAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
 			y=yAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
 			'''
