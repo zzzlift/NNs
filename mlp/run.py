@@ -54,7 +54,6 @@ if __name__=="__main__":
 	
 	prediction=mlp.BPClassifier()
 	
-	dis=prediction-mlp.test_labels
 	'''
 	mse=mlp.errorFunc(dis)
 	print mse

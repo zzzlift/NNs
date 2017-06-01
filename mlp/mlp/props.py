@@ -2,7 +2,7 @@ import gzip
 import numpy as np
 import cPickle
 '''
-created on May 28 2017
+created on June 1 2017
 @author: Zack
 '''
 class props(object):

@@ -2,7 +2,7 @@ import gzip
 import numpy as np
 import cPickle
 '''
-created on May 28 2017
+created on June 1 2017
 @author: Zack
 '''
 class layer(object):
@@ -45,7 +45,6 @@ class layer(object):
 		self.input=0
 		self.input_extend=0
 		self.inputDim=0
-		self.samples=10
 		self.error=100
 		self.layer_output=0
 		self.first_flag1=True
@@ -61,12 +60,8 @@ class layer(object):
 		train_sampleNum is the number of training samples
 		'''
 		
-		self.errorList=[]
-		self.train_set=0
 		self.valid_set=0
 		self.labels=0
-		self.test_set=0
-		self.test_labels=0
 		self.inputDim=0
 		self.train_sampleNum=0
 		self.layer_wb=0
@@ -110,7 +105,8 @@ class layer(object):
 		if self.first_flag1==True:
 			self.init_WB()
 			self.first_flag1=False
-		self.input_extend=self.addCol(self.input,np.ones((self.samples,1)))
+		samples=self.input.shape[0]
+		self.input_extend=self.addCol(self.input,np.ones((samples,1)))
 		layer_input=np.dot(self.input_extend,self.layer_wb.T)
 		layer_output=self.activation.activation(layer_input)
 		return layer_output

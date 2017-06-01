@@ -1,7 +1,10 @@
 import numpy as np
 import gzip
 import cPickle
-
+'''
+created on June 1 2017
+@author: Zack
+'''
 def normalize(dataMat):
 	'''
 	[[sample1],

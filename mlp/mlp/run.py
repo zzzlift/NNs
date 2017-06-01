@@ -2,10 +2,17 @@ import numpy as np
 from layer import *
 from props import *
 from utils import *
-
+'''
+@Departured
+'''
 
 	
 if __name__=="__main__":
+
+	errorList=[]
+	iteration=0
+	error_goal=0.01
+	
 	props=props()
 	data=loadDataSetgzip('../../data/mnist.pkl.gz')
 	
@@ -47,7 +54,7 @@ if __name__=="__main__":
 		else:
 			batch_id=i
 		x=xAll[batch_id*batch:(batch_id+1)*batch,:]
-		y=yAll[batch_id*batch:(batch_id+1)*batch,:]
+		y=labels[batch_id*batch:(batch_id+1)*batch,:]
 		
 		hidden_layer1.input=x
 		hidden_layer1.samples=x.shape[0]
@@ -63,7 +70,11 @@ if __name__=="__main__":
 		
 		error=y-output_layer_output
 		mse=props.errorFunc(error)
-		print mse
+		print 'mse '+str(mse)
+		errorList.append(mse)
+		if mse<=error_goal:
+			iteration=i+1
+			break;
 		output_layer.error=error
 		
 		output_layer.layer_output=output_layer_output

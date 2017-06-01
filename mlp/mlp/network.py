@@ -1,123 +1,105 @@
-import gzip
 import numpy as np
-import cPickle
-'''
-created on May 28 2017
-@author: Zack
-'''
-class network(object):
-	'''
-	def __init__(self):
-	def init_hiddenWB(self):
-	def init_outputWB(self):
-	def loadDataSet(self,filepath):
-	def normalize(self,dataMat):
-	def addRow(self,mat1,mat2):
-	def addCol(self,mat1,mat2):
-	def activation(self,data):
-	def errorFunc(self,data):
-	def derivative(self,data):
-	def bpTrain(self):
-	def BPClassifier(self):
-	'''
+from layer import *
+from props import *
+from utils import *
 
-	'''
-	because it use some from *** import * so we use self.function() to identify we invoke this function in this file
-	'''
+
+	
+class network():
+
 	def __init__(self):
-		'''
-		parameter settings
-		error_goal is the threshold of error sensitivity
-		max_iteration is the max iteration
-		iteration is the current iteration when finish
-		hidden_neurons is the number of hidden neurons
-		eta is the learning rate/step length
-		mc is the momentum parameter
-		'''
-		self.error_goal=0.01
-		self.max_itration=1000
-		self.iteration=0
-		self.eta=0.001
-		self.mc=0.3
-		self.hidden_neurons=4
-		self.output_neurons=10
-		self.batch=10
-		#receive a class
-		self.activation=0
-		self.hidden_output=0
-		'''
-		automatic parameter
-		errorList is the current error for visulation
-		train_set is the training set
-		labels is the training label
-		valid_set is for overfitting
-		test_set is for test
-		inputDim is the dimension of samples
-		train_sampleNum is the number of training samples
-		'''
-		
 		self.errorList=[]
-		self.train_set=0
-		self.valid_set=0
+		self.iteration=0
+		self.error_goal=0.01
+		self.max_itration=100
+		self.batch=10
+		self.xAll=0
 		self.labels=0
+		self.props=0
+		self.hidden_layer1=0
+		self.hidden_layer2=0
+		self.hidden_layer3=0
+		self.hidden_layer4=0
+		self.output_layer=0
 		self.test_set=0
-		self.test_labels=0
-		self.inputDim=0
-		self.train_sampleNum=0
 	
-	
-	
-	def init_WB(self):
-		self.output_w=2*np.random.random((self.output_neurons,self.hidden_neurons)) - 1;
-		self.output_bias=2*np.random.random((self.output_neurons,1)) - 1
-		self.output_wb=self.addCol(self.output_w,self.output_bias)
+	def train(self):
+		#sigmoid needs the [-1,1] range, not the [0,1]
+		self.xAll=normalize(self.xAll)
 		
-	def addRow(self,mat1,mat2):
-		mat=np.vstack((mat1,mat2))
-		return mat
-		
-	def addCol(self,mat1,mat2):
-		mat=np.hstack((mat1,mat2))
-		return mat
-		
-	
-	def bpTrain(self):
-		#return
-		
-		self.init_WB()
-		delta_output_wb_old=0
+		#mlp.labels=np.matrix(y).T
 		
 		
-		#forward process
-		hidden_output_extend=self.addCol(self.hidden_output,np.ones((self.batch,1)))
-		output_input=np.dot(hidden_output_extend,self.output_wb.T)
-		output_output=self.activation.activation(output_input)
+		#initialize the network
+		hidden_layer1=layer()
+		hidden_layer2=layer()
+		output_layer=layer()
 		
-		error=y-output_output
-		mse=self.errorFunc(error)
 		
-		print 'mse '+str(mse)
-		self.errorList.append(mse)
-		if mse<=self.error_goal:
-			self.iteration=i+1
-			break;
+		train_samples=self.xAll.shape[0]
+		hidden_layer1.inputDim=self.xAll.shape[1]
+		hidden_layer1.neurons=10
+		hidden_layer1.activation=self.props
+		
+		hidden_layer2.inputDim=hidden_layer1.neurons
+		hidden_layer2.neurons=5
+		hidden_layer2.activation=self.props
+		
+		output_layer.inputDim=hidden_layer2.neurons
+		output_layer.neurons=self.labels.shape[1]
+		output_layer.activation=self.props
+		
+		#training
+		for i in xrange(self.max_itration):
+			if self.max_itration*self.batch>train_samples:
+				batch_id=i%self.max_itration
+			else:
+				batch_id=i
+			x=self.xAll[batch_id*self.batch:(batch_id+1)*self.batch,:]
+			y=self.labels[batch_id*self.batch:(batch_id+1)*self.batch,:]
 			
+			hidden_layer1.input=x
+			hidden_layer1.samples=x.shape[0]
+			hidden_layer1_output=hidden_layer1.forward()
 			
-		#backword	
-		output_gradient=np.multiply(error,self.derivative.derivative(output_output))
-		delta_output_wb=np.dot(output_gradient.T,hidden_output_extend)
-		hidden_delta=np.multiply(np.dot(output_gradient,self.output_wb[:,:-1]),self.derivative(hidden_output))
-
-		#update
-		self.output_wb=self.output_wb+(1.0-self.mc)*self.eta*delta_output_wb + self.mc*delta_output_wb_old
-		delta_output_wb_old=delta_output_wb
+			hidden_layer2.input=hidden_layer1_output
+			hidden_layer2.samples=x.shape[0]
+			hidden_layer2_output=hidden_layer2.forward()
+			
+			output_layer.input=hidden_layer2_output
+			output_layer.samples=x.shape[0]
+			output_layer_output=output_layer.forward()
+			
+			error=y-output_layer_output
+			mse=self.props.errorFunc(error)
+			print 'mse '+str(mse)
+			self.errorList.append(mse)
+			if mse<=self.error_goal:
+				self.iteration=i+1
+				break;
+			output_layer.error=error
+			
+			output_layer.layer_output=output_layer_output
+			L2_error=output_layer.backword()
+			
+			hidden_layer2.layer_output=hidden_layer2_output
+			hidden_layer2.error=L2_error
+			L1_error=hidden_layer2.backword()
+			
+			hidden_layer1.layer_output=hidden_layer1_output
+			hidden_layer1.error=L1_error
+			hidden_layer1.backword()
+		
+		self.hidden_layer1=hidden_layer1
+		self.hidden_layer2=hidden_layer2
+		self.output_layer=output_layer
 	
-	#classifier is the forward process
-	def prediction(self):
-		hidden_output_extend=self.addCol(self.hidden_output,np.ones((self.batch,1)))
-		output_input=np.dot(hidden_output_extend,self.output_wb.T)
-		output_output=self.activation.activation(output_input)
+	def predict(self):
+		x=normalize(self.test_set)
+		self.hidden_layer1.input=x
+		hidden1_output=self.hidden_layer1.forward()
+		self.hidden_layer2.input=hidden1_output
+		hidden2_output=self.hidden_layer2.forward()
+		self.output_layer.input=hidden2_output
+		output_output=self.output_layer.forward()
 		return output_output
-		
-
-		
