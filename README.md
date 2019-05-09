@@ -1,4 +1,4 @@
-###MLP
+### MLP
 This is a toy multi-layer perceptron program that implements the backpropagation process without the help of other lib.
 
 ## Updating...
